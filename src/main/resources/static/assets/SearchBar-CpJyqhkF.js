@@ -1,0 +1,1 @@
+import{_ as c,l as r,c as t,e as s,a9 as a}from"./index-VMlF3dzw.js";const o={},n={class:"search-bar"},_={class:"search-bar__fields"},d={class:"search-bar__actions"};function i(e,l){return r(),t("div",n,[s("div",_,[a(e.$slots,"default",{},void 0,!0)]),s("div",d,[a(e.$slots,"actions",{},void 0,!0)])])}const h=c(o,[["render",i],["__scopeId","data-v-41c19ff1"]]);export{h as S};

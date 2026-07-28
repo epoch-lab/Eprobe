@@ -1,0 +1,10 @@
+.task-toolbar[data-v-ca3f5c7a] {
+    margin-bottom: 14px
+}
+
+.deadline-cell[data-v-ca3f5c7a] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center
+}

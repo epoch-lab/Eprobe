@@ -1,0 +1,1 @@
+import{T as t,U as n,V as p,W as o}from"./index-VMlF3dzw.js";function r(){return t("/applications")}function s(a){return t(`/applications/${a}`)}function e(a){return p("/applications",a)}function u(a,i){return n(`/applications/${a}`,i)}function l(a){return o(`/applications/${a}`)}function f(){return t("/applications/summary")}export{f as a,s as b,e as c,r as g,u,l as w};

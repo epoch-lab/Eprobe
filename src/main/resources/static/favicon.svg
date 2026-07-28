@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1714" height="2058" viewBox="0 0 1714 2058">
+    <defs>
+        <linearGradient id="epochGradient" x1="0" y1="0" x2="1714" y2="2058" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#7d66bb"/>
+            <stop offset="100%" stop-color="#5a6df2"/>
+        </linearGradient>
+        <path id="epochShape" fill-rule="evenodd"
+              d="M1713.683 743.393c-8.269 23.863-57.362 144.796-216.994 193.467-177.509 54.121-268.575-26.169-273.86-43.501-.095-.312-.174-.571-.259-.851-5.283-17.334 25.497-134.772 203.004-188.892 159.638-48.673 267.852 24.305 288.023 39.492.135.112.137.111.086.285Zm-489.626 153.993c.088.287.079.26 0 0Zm-.226-.743c.098.325.175.577.226.743-.047-.153-.12-.394-.226-.743Zm-.392-1.283c.162.531.291.953.392 1.283-.11-.358-.242-.793-.392-1.283Zm-.49-1.609c.172.566.338 1.111.49 1.609-.138-.455-.301-.989-.49-1.609Zm-.021-.069c.006.022.014.048.021.069l-.021-.069Zm-.358-1.173c.119.391.239.785.358 1.173-.113-.368-.227-.743-.358-1.173Zm0-.001v.001c-1.163-3.816-2.2-7.216 0-.001ZM1076.574 683.36c-.307-.241-.615-.483-.921-.724-18.734-14.731-72.6-166.131 81.777-362.513 138.838-176.614 312.038-181.25 345.505-180.393.231.016.232.014.306.243 8.736 32.326 45.12 201.718-93.714 378.326-154.377 196.382-314.216 179.787-332.953 165.061Zm-.001 0v-.001c-9.043-7.109-5.204-4.091-.92-.723l.001.001c.324.255.628.493.919.723Zm0 0h.001c4.13 3.247 7.843 6.166-.001 0Zm-112.686-21.689c-.378.248-.759.496-1.137.744-23.098 15.105-208.515 19.164-365.013-220.046C456.991 227.235 516.816 36.734 530.288.557c.104-.246.103-.248.38-.246 38.554 2.147 237.06 23.641 377.802 238.768 156.499 239.212 78.508 407.48 55.417 422.592Zm0 0c5.28-3.454 10.012-6.55-1.134.742l-.001.001c.359-.235.734-.48 1.133-.742.001 0 .001 0 .002-.001Zm-1.137.744c.001-.001.001-.001.002-.001-9.668 6.325-5.092 3.331-.002.001ZM782.866 833.312c-.161.487-.311.943-.455 1.381-9.263 28.113-159.153 156.463-442.06 63.314C85.917 814.232 12.332 615.718.094 576.596c-.073-.275-.075-.275.154-.461 33.095-24.203 210.222-140.158 464.647-56.386 282.916 93.152 327.225 285.455 317.971 313.563Zm-.454 1.379-.001.001c2.268-6.887 4.788-14.54.001-.001Zm-.001.002v-.001c-2.04 6.197-3.875 11.768 0 .001Zm-450.058 302.253c270.214-176 456.406-92.937 472.798-67.781.268.411.538.825.806 1.237 16.382 25.158 17.088 229.04-253.129 405.041-243.017 158.285-454.4 95.559-494.498 81.325-.273-.111-.275-.109-.267-.414 3.193-42.44 31.281-261.129 274.29-419.408Zm472.799-67.78s.001 0 .001.001c7.909 12.142 4.551 6.987.804 1.235 0-.001 0-.001-.001-.001-.283-.436-.549-.844-.804-1.235Zm0 0c0-.001 0-.001-.001-.001-3.612-5.546-6.858-10.531.001.001Zm94.494-70.518-40.679-143.351 105.79-104.941 146.469 38.409 40.68 143.351-105.79 104.941-146.47-38.409Zm114.649 117.508h1.66c33.846 0 226.915 116.809 226.915 457.151 0 306.078-189.345 456.88-227.469 484.142-.273.177-.272.18-.556-.003-38.133-27.269-227.465-178.071-227.465-484.139 0-340.342 193.068-457.151 226.915-457.151Zm207.976-44.31c.119-.173.23-.335.364-.528 7.393-10.729 86.725-46.324 194.985 28.283 97.361 67.097 103.967 160.174 104.31 178.235-.003.126-.002.126-.122.176-17.004 6.11-106.333 33.068-203.691-34.026-108.253-74.603-103.24-161.403-95.846-172.14Zm0-.001v.001c-3.077 4.463-1.627 2.36 0-.001Zm0 0 .001-.001c3.825-5.551 1.811-2.628-.001.001Z"/>
+        <filter id="epochTitleCardGrain" x="0" y="0" width="1714" height="2058" filterUnits="userSpaceOnUse"
+                color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+            <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" seed="7458"
+                          result="noise"/>
+            <feColorMatrix in="noise" type="luminanceToAlpha" result="alphaNoise"/>
+            <feComponentTransfer in="alphaNoise" result="grainMask">
+                <feFuncA type="discrete"
+                         tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+            </feComponentTransfer>
+            <feComposite operator="in" in="grainMask" in2="shape" result="grainClipped"/>
+            <feFlood flood-color="#49399d" flood-opacity="0.22" result="grainColor"/>
+            <feComposite operator="in" in="grainColor" in2="grainClipped" result="darkGrain"/>
+            <feTurbulence type="fractalNoise" baseFrequency="2.4 2.4" stitchTiles="stitch" numOctaves="2" seed="2287"
+                          result="sparkleNoise"/>
+            <feColorMatrix in="sparkleNoise" type="luminanceToAlpha" result="sparkleAlpha"/>
+            <feComponentTransfer in="sparkleAlpha" result="sparkleMask">
+                <feFuncA type="discrete"
+                         tableValues="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1"/>
+            </feComponentTransfer>
+            <feComposite operator="in" in="sparkleMask" in2="shape" result="sparkleClipped"/>
+            <feFlood flood-color="#d9d1ff" flood-opacity="0.18" result="sparkleColor"/>
+            <feComposite operator="in" in="sparkleColor" in2="sparkleClipped" result="lightGrain"/>
+            <feMerge result="effect_title_card_grain">
+                <feMergeNode in="shape"/>
+                <feMergeNode in="darkGrain"/>
+                <feMergeNode in="lightGrain"/>
+            </feMerge>
+        </filter>
+    </defs>
+
+    <use href="#epochShape" fill="url(#epochGradient)" fill-rule="evenodd" filter="url(#epochTitleCardGrain)"/>
+</svg>

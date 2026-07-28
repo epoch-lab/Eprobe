@@ -1,0 +1,1 @@
+.detail-grid[data-v-d588f93e]{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,360px);gap:16px}h2[data-v-d588f93e]{margin:0 0 14px;font-size:18px}.compact[data-v-d588f93e]{grid-template-columns:repeat(2,minmax(0,1fr))}.note[data-v-d588f93e]{margin:12px 0 0;line-height:1.6}@media(max-width:860px){.detail-grid[data-v-d588f93e]{grid-template-columns:1fr}}

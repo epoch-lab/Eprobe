@@ -1,0 +1,10 @@
+.export-grid[data-v-488c0308] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px
+}
+
+.group-select[data-v-488c0308] {
+    width: 240px
+}

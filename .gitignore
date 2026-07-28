@@ -1,0 +1,11 @@
+HELP.md
+target/
+logs/
+storage/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+config_helper
+document
+.agents
+.idea

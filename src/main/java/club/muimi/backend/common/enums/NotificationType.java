@@ -1,0 +1,12 @@
+package club.muimi.backend.common.enums;
+
+public enum NotificationType {
+    APPLICATION_REJECTED,
+    APPLICATION_GROUPED,
+    APPLICATION_UNASSIGNED,
+    TASK_PUBLISHED,
+    TASK_RETURNED,
+    TASK_REVIEWED,
+    ANNOUNCEMENT_PUBLISHED,
+    MATERIAL_PUBLISHED
+}

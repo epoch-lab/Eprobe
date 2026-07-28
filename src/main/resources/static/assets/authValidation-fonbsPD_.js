@@ -1,0 +1,1 @@
+const i="密码至少 8 位，且必须同时包含字母和数字";function t(s){return s.trim().toLowerCase()}function a(s){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t(s))}function n(s){return/^[A-Za-z0-9_]{3,32}$/.test(s.trim())}function e(s){return s.length>=8&&/[A-Za-z]/.test(s)&&/\d/.test(s)}function r(s){return/^\d{6}$/.test(s.trim())}export{n as a,e as b,r as c,a as i,t as n,i as p};
