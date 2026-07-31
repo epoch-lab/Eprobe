@@ -4,6 +4,8 @@ import club.muimi.backend.common.enums.Role;
 import club.muimi.backend.common.enums.UserStatus;
 import club.muimi.backend.dto.admin.UpdateUserRoleRequest;
 import club.muimi.backend.dto.admin.UpdateUserStatusRequest;
+import club.muimi.backend.dto.admin.CreateUserRequest;
+import club.muimi.backend.dto.admin.UpdateUserRequest;
 import club.muimi.backend.entity.RecruitmentGroup;
 import club.muimi.backend.entity.User;
 import club.muimi.backend.exception.ConflictException;
@@ -30,6 +32,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AdminUserServiceTest {
@@ -46,6 +49,8 @@ class AdminUserServiceTest {
     private CurrentUserService currentUserService;
     @Mock
     private AuditLogService auditLogService;
+    @Mock
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     private AdminUserService adminUserService;
 
@@ -57,7 +62,8 @@ class AdminUserServiceTest {
                 groupMemberRepository,
                 recruitmentGroupRepository,
                 currentUserService,
-                auditLogService
+                auditLogService,
+                passwordEncoder
         );
     }
 
@@ -233,5 +239,58 @@ class AdminUserServiceTest {
         assertThat(result.leaderGroups())
                 .extracting(club.muimi.backend.vo.auth.GroupSimpleVo::id)
                 .containsExactly(20L, 10L);
+    }
+
+    @Test
+    void createUserShouldRequireHighestAdminAndHashPassword() {
+        LoginUser admin = new LoginUser(1L, "admin", "admin@example.com", "hashed", Role.ADMIN, UserStatus.ACTIVE, 0L, "jti-admin");
+        when(currentUserService.requireCurrentUser()).thenReturn(admin);
+        when(userRepository.existsByUsername("new_user")).thenReturn(false);
+        when(userRepository.findByEmail("new_user@example.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("NewPass123")).thenReturn("encoded");
+        User created = User.builder().id(8L).username("new_user").email("new_user@example.com")
+                .passwordHash("encoded").role(Role.LEADER).status(UserStatus.ACTIVE).emailVerified(true).tokenVersion(0L).build();
+        when(userRepository.save(org.mockito.ArgumentMatchers.any(User.class))).thenReturn(created);
+        when(groupMemberRepository.findAllByUserId(8L)).thenReturn(List.of());
+        when(recruitmentGroupRepository.findAllByLeaderUserIdOrderByCreatedAtDesc(8L)).thenReturn(List.of());
+        when(applicationRepository.countByUserId(8L)).thenReturn(0L);
+
+        var result = adminUserService.createUser(new CreateUserRequest("new_user", "new_user@example.com", "NewPass123", "NewPass123", Role.LEADER, UserStatus.ACTIVE, true));
+
+        assertThat(result.id()).isEqualTo(8L);
+        verify(passwordEncoder).encode("NewPass123");
+    }
+
+    @Test
+    void createUserShouldRejectNonAdmin() {
+        when(currentUserService.requireCurrentUser()).thenReturn(new LoginUser(2L, "leader", "leader@example.com", "hashed", Role.LEADER, UserStatus.ACTIVE, 0L, "jti"));
+        assertThatThrownBy(() -> adminUserService.createUser(new CreateUserRequest("new_user", "new@example.com", "NewPass123", "NewPass123", Role.FRESHMAN, UserStatus.ACTIVE, true)))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("仅最高管理员可以执行此操作");
+    }
+
+    @Test
+    void deleteUserShouldRejectReferencedUser() {
+        LoginUser admin = new LoginUser(1L, "admin", "admin@example.com", "hashed", Role.ADMIN, UserStatus.ACTIVE, 0L, "jti-admin");
+        User target = User.builder().id(2L).username("target").email("target@example.com").passwordHash("hash").role(Role.FRESHMAN).status(UserStatus.ACTIVE).build();
+        when(currentUserService.requireCurrentUser()).thenReturn(admin);
+        when(userRepository.findById(2L)).thenReturn(Optional.of(target));
+        org.mockito.Mockito.doThrow(new org.springframework.dao.DataIntegrityViolationException("fk"))
+                .when(userRepository).flush();
+
+        assertThatThrownBy(() -> adminUserService.deleteUser(2L))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("该用户仍有关联业务数据，无法删除");
+    }
+
+    @Test
+    void updateUserShouldNotAllowAdminToChangeOwnRoleOrStatus() {
+        LoginUser admin = new LoginUser(1L, "admin", "admin@example.com", "hashed", Role.ADMIN, UserStatus.ACTIVE, 0L, "jti-admin");
+        when(currentUserService.requireCurrentUser()).thenReturn(admin);
+
+        assertThatThrownBy(() -> adminUserService.updateUser(1L,
+                new UpdateUserRequest("admin", "admin@example.com", null, null, Role.FRESHMAN, UserStatus.ACTIVE, true)))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("管理员不能修改自己的角色或状态");
     }
 }

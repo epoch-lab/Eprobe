@@ -6,6 +6,8 @@ import club.muimi.backend.common.enums.Role;
 import club.muimi.backend.common.enums.UserStatus;
 import club.muimi.backend.dto.admin.UpdateUserRoleRequest;
 import club.muimi.backend.dto.admin.UpdateUserStatusRequest;
+import club.muimi.backend.dto.admin.CreateUserRequest;
+import club.muimi.backend.dto.admin.UpdateUserRequest;
 import club.muimi.backend.service.admin.AdminUserService;
 import club.muimi.backend.vo.admin.AdminUserDetailVo;
 import club.muimi.backend.vo.admin.AdminUserSummaryVo;
@@ -47,6 +49,25 @@ public class AdminUserController {
     @GetMapping("/{userId}")
     public ApiResponse<AdminUserDetailVo> getUserDetail(@PathVariable Long userId) {
         return ApiResponse.success(adminUserService.getUserDetail(userId), "ok");
+    }
+
+    @PostMapping
+    public ApiResponse<AdminUserDetailVo> createUser(@Valid @RequestBody CreateUserRequest request) {
+        return ApiResponse.success(adminUserService.createUser(request), "用户创建成功");
+    }
+
+    @RequestMapping(value = "/{userId}", method = {RequestMethod.PUT, RequestMethod.PATCH})
+    public ApiResponse<AdminUserDetailVo> updateUser(
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateUserRequest request
+    ) {
+        return ApiResponse.success(adminUserService.updateUser(userId, request), "用户信息更新成功");
+    }
+
+    @DeleteMapping("/{userId}")
+    public ApiResponse<Void> deleteUser(@PathVariable Long userId) {
+        adminUserService.deleteUser(userId);
+        return ApiResponse.success(null, "用户删除成功");
     }
 
     @PatchMapping("/{userId}/status")
