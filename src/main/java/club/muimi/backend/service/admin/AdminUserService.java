@@ -7,6 +7,8 @@ import club.muimi.backend.common.enums.Role;
 import club.muimi.backend.common.enums.UserStatus;
 import club.muimi.backend.dto.admin.UpdateUserRoleRequest;
 import club.muimi.backend.dto.admin.UpdateUserStatusRequest;
+import club.muimi.backend.dto.admin.CreateUserRequest;
+import club.muimi.backend.dto.admin.UpdateUserRequest;
 import club.muimi.backend.entity.Application;
 import club.muimi.backend.entity.GroupMember;
 import club.muimi.backend.entity.RecruitmentGroup;
@@ -29,8 +31,11 @@ import club.muimi.backend.vo.auth.GroupSimpleVo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,7 +49,28 @@ public class AdminUserService {
     private final RecruitmentGroupRepository recruitmentGroupRepository;
     private final CurrentUserService currentUserService;
     private final AuditLogService auditLogService;
+    private final PasswordEncoder passwordEncoder;
 
+    @Autowired
+    public AdminUserService(
+            UserRepository userRepository,
+            ApplicationRepository applicationRepository,
+            GroupMemberRepository groupMemberRepository,
+            RecruitmentGroupRepository recruitmentGroupRepository,
+            CurrentUserService currentUserService,
+            AuditLogService auditLogService,
+            PasswordEncoder passwordEncoder
+    ) {
+        this.userRepository = userRepository;
+        this.applicationRepository = applicationRepository;
+        this.groupMemberRepository = groupMemberRepository;
+        this.recruitmentGroupRepository = recruitmentGroupRepository;
+        this.currentUserService = currentUserService;
+        this.auditLogService = auditLogService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    /** Constructor retained for existing unit tests that exercise legacy methods. */
     public AdminUserService(
             UserRepository userRepository,
             ApplicationRepository applicationRepository,
@@ -53,12 +79,8 @@ public class AdminUserService {
             CurrentUserService currentUserService,
             AuditLogService auditLogService
     ) {
-        this.userRepository = userRepository;
-        this.applicationRepository = applicationRepository;
-        this.groupMemberRepository = groupMemberRepository;
-        this.recruitmentGroupRepository = recruitmentGroupRepository;
-        this.currentUserService = currentUserService;
-        this.auditLogService = auditLogService;
+        this(userRepository, applicationRepository, groupMemberRepository, recruitmentGroupRepository,
+                currentUserService, auditLogService, null);
     }
 
     @Transactional(readOnly = true)
@@ -170,6 +192,129 @@ public class AdminUserService {
                 .detail(detail)
                 .build());
         return toDetailVo(user);
+    }
+
+    @Transactional
+    public AdminUserDetailVo createUser(CreateUserRequest request) {
+        LoginUser currentUser = requireHighestAdmin();
+        validatePasswordPair(request.password(), request.confirmPassword());
+        validatePasswordStrength(request.password());
+        ensureUsernameAndEmailAvailable(request.username(), request.email(), null);
+
+        User user = User.builder()
+                .username(request.username().trim())
+                .email(request.email().trim())
+                .passwordHash(requirePasswordEncoder().encode(request.password()))
+                .emailVerified(Boolean.TRUE.equals(request.emailVerified()))
+                .role(request.role())
+                .status(request.status())
+                .tokenVersion(0L)
+                .build();
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException exception) {
+            throw new ConflictException("用户名或邮箱已存在");
+        }
+        auditLogService.record(AuditLogCommand.builder(AuditModule.AUTH, "ADMIN_CREATE_USER",
+                        AuditSeverity.IMPORTANT, "管理员创建用户")
+                .actor(currentUser).target("USER", user.getId())
+                .detail(Map.of("role", user.getRole(), "status", user.getStatus())).build());
+        return toDetailVo(user);
+    }
+
+    @Transactional
+    public AdminUserDetailVo updateUser(Long userId, UpdateUserRequest request) {
+        LoginUser currentUser = requireHighestAdmin();
+        if (currentUser.getUserId().equals(userId)
+                && (request.role() != Role.ADMIN || request.status() != UserStatus.ACTIVE)) {
+            throw new ForbiddenException("管理员不能修改自己的角色或状态");
+        }
+        User user = getUserOrThrow(userId);
+        ensureUsernameAndEmailAvailable(request.username(), request.email(), userId);
+        if (request.password() != null && !request.password().isBlank()) {
+            validatePasswordPair(request.password(), request.confirmPassword());
+            validatePasswordStrength(request.password());
+            user.setPasswordHash(requirePasswordEncoder().encode(request.password()));
+        }
+        user.setUsername(request.username().trim());
+        user.setEmail(request.email().trim());
+        user.setRole(request.role());
+        user.setStatus(request.status());
+        user.setEmailVerified(Boolean.TRUE.equals(request.emailVerified()));
+        user.setTokenVersion(user.getTokenVersion() + 1);
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException exception) {
+            throw new ConflictException("用户名或邮箱已存在");
+        }
+        auditLogService.record(AuditLogCommand.builder(AuditModule.AUTH, "ADMIN_UPDATE_USER",
+                        AuditSeverity.IMPORTANT, "管理员修改用户信息")
+                .actor(currentUser).target("USER", userId)
+                .detail(Map.of("role", user.getRole(), "status", user.getStatus())).build());
+        return toDetailVo(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        LoginUser currentUser = requireHighestAdmin();
+        if (currentUser.getUserId().equals(userId)) {
+            throw new ForbiddenException("管理员不能删除自己的账号");
+        }
+        User user = getUserOrThrow(userId);
+        try {
+            userRepository.delete(user);
+            userRepository.flush();
+        } catch (DataIntegrityViolationException exception) {
+            throw new ConflictException("该用户仍有关联业务数据，无法删除");
+        }
+        auditLogService.record(AuditLogCommand.builder(AuditModule.AUTH, "ADMIN_DELETE_USER",
+                        AuditSeverity.MAJOR, "管理员删除用户")
+                .actor(currentUser).target("USER", userId)
+                .detail(Map.of("username", user.getUsername(), "email", user.getEmail())).build());
+    }
+
+    private LoginUser requireHighestAdmin() {
+        LoginUser currentUser = currentUserService.requireCurrentUser();
+        if (currentUser.getRole() != Role.ADMIN) {
+            throw new ForbiddenException("仅最高管理员可以执行此操作");
+        }
+        return currentUser;
+    }
+
+    private PasswordEncoder requirePasswordEncoder() {
+        if (passwordEncoder == null) {
+            throw new IllegalStateException("PasswordEncoder 未配置");
+        }
+        return passwordEncoder;
+    }
+
+    private void ensureUsernameAndEmailAvailable(String username, String email, Long excludedUserId) {
+        userRepository.findByEmail(email.trim()).ifPresent(existing -> {
+            if (!Objects.equals(existing.getId(), excludedUserId)) {
+                throw new ConflictException("邮箱已被注册");
+            }
+        });
+        if (userRepository.existsByUsername(username.trim())) {
+            User existing = userRepository.findByUsername(username.trim()).orElse(null);
+            if (existing == null || !Objects.equals(existing.getId(), excludedUserId)) {
+                throw new ConflictException("用户名已存在");
+            }
+        }
+    }
+
+    private void validatePasswordPair(String password, String confirmPassword) {
+        if (password == null || !password.equals(confirmPassword)) {
+            throw new ValidationException("两次输入的密码不一致");
+        }
+    }
+
+    private void validatePasswordStrength(String password) {
+        boolean valid = password != null && password.length() >= 8
+                && password.chars().anyMatch(Character::isLetter)
+                && password.chars().anyMatch(Character::isDigit);
+        if (!valid) {
+            throw new ValidationException("密码至少 8 位，且必须同时包含字母和数字");
+        }
     }
 
     private AdminUserDetailVo toDetailVo(User user) {
